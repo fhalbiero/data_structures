@@ -1,8 +1,9 @@
-class LinkedList {
+class DoublyLinkedList {
     constructor(value) {
         this.head = {
             value: value,
-            next: null
+            prev: null,
+            next: null,
         };
         this.tail = this.head;
         this.length = 1;
@@ -12,6 +13,7 @@ class LinkedList {
     append(value) {
         const newNode = {
             value: value,
+            prev: this.tail,
             next: null
         }
         this.tail.next = newNode;
@@ -24,9 +26,10 @@ class LinkedList {
     prepend(value) {
         const newNode = {
             value: value,
-            next: null
+            prev: null,
+            next: this.head,
         }
-        newNode.next = this.head;
+        this.head.prev = newNode;
         this.head = newNode;
         this.length++;
         return this;
@@ -45,14 +48,15 @@ class LinkedList {
 
     //O(n) need to traverse
     insert(index, value){
-        if (index > this.length) {
+        if (index >= this.length) {
             return this.append(value);
         }
-        const newNode = { value, next: null };
-        const leader = this._traverseToIndex(index);
-        const holdingPointer = leader.next;
-        leader.next = newNode;
-        newNode.next = holdingPointer;
+        const prevNode = this._traverseToIndex(index - 1);
+        const newNode = { value, prev: prevNode, next: null };
+        const next = prevNode.next;
+        prevNode.next = newNode;
+        newNode.next = next;
+        next.prev = newNode;
         this.length++;
         return this.printList();
     }
@@ -60,27 +64,14 @@ class LinkedList {
     //O(n) need to traverse
     remove(index) {
         if (index >= this.length) return null;
-        const nodeBefore = this._traverseToIndex(index - 1);
-        const nodeToDelete = nodeBefore.next;
-        nodeBefore.next = nodeToDelete.next;
+        const prevNode = this._traverseToIndex(index - 1);
+        const nodeToDelete = prevNode.next;
+        prevNode.next = nodeToDelete.next;
+        if (nodeToDelete.next) {
+            nodeToDelete.next.prev = prevNode;
+        }
         this.length--;
         return nodeToDelete
-    }
-
-    //O(n) need to traverse
-    reverse() {
-        let prev = this.head;
-        let current = prev.next;
-        while (current) {
-            const temp = current.next;
-            current.next = prev;
-            prev = current; 
-            current = temp;
-        } 
-        this.head.next = null;
-        this.head = prev;
-        this.tail = this.head;
-        return this.printList();   
     }
 
     _traverseToIndex(index) {
@@ -94,7 +85,7 @@ class LinkedList {
     }
 }
   
-let myLinkedList = new LinkedList(10);
+let myLinkedList = new DoublyLinkedList(10);
 myLinkedList.append(5);
 myLinkedList.append(16);
 myLinkedList.prepend(1);
@@ -102,7 +93,6 @@ myLinkedList.insert(2, 99);
 myLinkedList.insert(4, 88);
 myLinkedList.remove(3);
 console.log(myLinkedList.printList());
-console.log(myLinkedList.reverse());
 
   
   
